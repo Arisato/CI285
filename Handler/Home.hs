@@ -17,35 +17,26 @@ import qualified Data.ByteString.Lazy.Internal as BS
 -- functions. You can spread them across multiple files if you are so
 -- inclined, or create a single monolithic file.
 
--- return (T.pack $ show $ res)
 
-getHomeR :: Handler Text
-getHomeR = do -- res <- lift megBite
-    result <- A.eitherDecode <$> (simpleHttp "http://www.phoric.eu/temperature")
-    case result of
-        Left error -> return (T.pack $ show $ error)
-        Right newResult -> do
-                _ <- (storeJson (takeJson newResult))
-                return ("Success!" :: Text)
-    where
-        storeJson [] = return ("alright"::Text)
+
+-- Stores dates and temperatures
+-- Then returns them as HTML
+getHomeR :: Handler Html
+getHomeR = do
+    let storeJson [] = return ()
         storeJson (x:xs) = do 
             _ <- runDB $ insert $ x
             storeJson xs
-
-
+    result <- A.decode <$> (simpleHttp "http://www.phoric.eu/temperature")
+    case result of
+        Nothing -> defaultLayout [whamlet|<p>Failed!|]
+        Just newResult -> do
+                _ <- (storeJson (takeJson newResult))
+                defaultLayout $(widgetFile "homepage")
+ 
+-- Unwraps temperatures
 takeJson :: MsgJson -> [Tempdates]
 takeJson (MsgJson {temperatures = t}) = t
-
-getAverage :: [Tempdates] -> Float
-getAverage ls = (getSum ls) / (fromIntegral (length ls))
-
-getSum :: [Tempdates] -> Float
-getSum [] = 0
-getSum (x:xs) = (getTemperatureVal x) + getSum xs
-
-getTemperatureVal :: Tempdates -> Float
-getTemperatureVal (Tempdates _ t) = fromIntegral t
 
 
 {-

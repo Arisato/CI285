@@ -1,0 +1,2 @@
+<h1>AVG Temperature
+<div class="jumbotron"><p>#{val}
