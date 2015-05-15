@@ -1,6 +1,7 @@
 # CI285
 Introduction to Functional Programming Web App Assignment<br>
 
+No intent for viva<br>
 To launch the web app you will need **Yesod Framework** installed on your machine.<br>
 Follow this link http://www.yesodweb.com/page/quickstart which contains few simple<br>
 steps on how to setup **Yesod**.<br><br>
